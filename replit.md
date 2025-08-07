@@ -1,6 +1,6 @@
 # Overview
 
-This is a Pokemon-themed gaming platform that combines Pokemon collection mechanics with casino-style gambling games and tournaments. Users can roll for random Pokemon using PokeAPI data, participate in various gambling games (slots, blackjack, coinflip, roulette), enter tournaments, and compete on leaderboards. The application manages a virtual currency system called "Pokecoins" and provides daily bonuses to keep users engaged.
+This project contains both a Discord bot (EWagerBot) and a simplified web application for Pokemon rolling and gambling tracking. The core features include Pokemon rolling with real PokeAPI data, tournament management, and gambling result logging. The project has been simplified to remove complex economy features and focus on basic functionality that matches the original Discord bot requirements.
 
 # User Preferences
 
@@ -33,18 +33,22 @@ The application uses PostgreSQL with Drizzle ORM:
 - **Database Provider**: Configured for Neon serverless PostgreSQL
 
 ## Core Data Models
-- **Users**: Profile data, pokecoin balance, transaction history
-- **Pokemon Rolls**: Captured Pokemon with full stats and metadata
-- **Gambling Games**: Game history, results, and payouts
-- **Tournaments**: Tournament management, participants, and winners
-- **Trades**: User-to-user trading system (planned feature)
-- **Daily Bonuses**: Time-gated reward system
+- **Users**: Basic profile data for tracking
+- **Pokemon Rolls**: Captured Pokemon with full stats and metadata from PokeAPI
+- **Gambling Logs**: Simple win/loss tracking between users
+- **Tournaments**: Tournament management with customizable sizes and participants
 
 ## Game Logic
-- **Pokemon Rolling**: Integration with PokeAPI for authentic Pokemon data
-- **Casino Games**: Client-side game logic with server-side validation
-- **Tournament System**: Round-robin or elimination-style tournaments
-- **Economy System**: Balanced virtual currency with earning and spending mechanisms
+- **Pokemon Rolling**: Integration with PokeAPI for authentic Pokemon data (1-1025)
+- **Number Rolling**: Simple random number generation (1-100)
+- **Tournament System**: Basic tournament creation and participation
+- **Gambling Tracking**: Log gambling results between users
+
+## Discord Bot Features
+- **Commands**: Prefix-based commands (!) for all functionality
+- **Data Storage**: JSON file-based persistence
+- **Real-time**: Instant responses and updates
+- **User Friendly**: Rich embeds and error handling
 
 # External Dependencies
 
