@@ -5,10 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
-import Casino from "@/pages/casino";
 import Tournaments from "@/pages/tournaments";
-import Leaderboard from "@/pages/leaderboard";
-import Admin from "@/pages/admin";
+import GamblingLogs from "@/pages/gambling-logs";
 import Navbar from "@/components/navbar";
 
 function Router() {
@@ -18,10 +16,8 @@ function Router() {
       <main className="container mx-auto px-4 py-8">
         <Switch>
           <Route path="/" component={Home} />
-          <Route path="/casino" component={Casino} />
           <Route path="/tournaments" component={Tournaments} />
-          <Route path="/leaderboard" component={Leaderboard} />
-          <Route path="/admin" component={Admin} />
+          <Route path="/gambling-logs" component={GamblingLogs} />
           <Route component={NotFound} />
         </Switch>
       </main>

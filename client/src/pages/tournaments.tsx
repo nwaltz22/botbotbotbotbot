@@ -8,20 +8,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Trophy, Users, Coins, Calendar, Play } from "lucide-react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import PokecoinDisplay from "@/components/pokecoin-display";
-import type { User, Tournament } from "@shared/schema";
+import type { Tournament } from "@shared/schema";
 
 const CURRENT_USER_ID = "test-user-1";
 
 export default function Tournaments() {
-  const [newTournamentName, setNewTournamentName] = useState("");
-  const [newTournamentFee, setNewTournamentFee] = useState(100);
   const [newTournamentSize, setNewTournamentSize] = useState(20);
   const { toast } = useToast();
 
-  const { data: user } = useQuery<User>({
-    queryKey: ["/api/users", CURRENT_USER_ID],
-  });
+
 
   const { data: tournaments } = useQuery<Tournament[]>({
     queryKey: ["/api/tournaments"],
@@ -36,9 +31,8 @@ export default function Tournaments() {
       queryClient.invalidateQueries({ queryKey: ["/api/tournaments"] });
       toast({
         title: "Tournament Created!",
-        description: "Your tournament is now open for registration.",
+        description: "Tournament is now open for registration.",
       });
-      setNewTournamentName("");
     },
     onError: () => {
       toast({
@@ -58,7 +52,6 @@ export default function Tournaments() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tournaments"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/users", CURRENT_USER_ID] });
       toast({
         title: "Joined Tournament!",
         description: "Good luck in the tournament!",
@@ -67,7 +60,7 @@ export default function Tournaments() {
     onError: () => {
       toast({
         title: "Failed to Join Tournament",
-        description: "Insufficient Pokecoins or tournament is full.",
+        description: "Tournament is full or already started.",
         variant: "destructive",
       });
     },
@@ -88,14 +81,9 @@ export default function Tournaments() {
   });
 
   const handleCreateTournament = () => {
-    if (!newTournamentName.trim()) return;
-    
     createTournamentMutation.mutate({
-      name: newTournamentName,
-      entryFee: newTournamentFee,
-      maxParticipants: newTournamentSize,
+      size: newTournamentSize,
       participants: [],
-      prizePool: 0,
     });
   };
 
@@ -108,12 +96,11 @@ export default function Tournaments() {
       {/* Header */}
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">
-          Pokemon Tournaments
+          Tournaments
         </h1>
         <p className="text-muted-foreground max-w-2xl mx-auto">
-          Compete with other trainers for Pokecoin prizes!
+          Join tournaments and compete with other users!
         </p>
-        {user && <PokecoinDisplay balance={user.pokecoinBalance} />}
       </div>
 
       <div className="flex justify-between items-center">
@@ -133,25 +120,7 @@ export default function Tournaments() {
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium">Tournament Name</label>
-                <Input
-                  value={newTournamentName}
-                  onChange={(e) => setNewTournamentName(e.target.value)}
-                  placeholder="Enter tournament name..."
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Entry Fee (Pokecoins)</label>
-                <Input
-                  type="number"
-                  value={newTournamentFee}
-                  onChange={(e) => setNewTournamentFee(parseInt(e.target.value) || 100)}
-                  min="10"
-                  max="1000"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Max Participants</label>
+                <label className="text-sm font-medium">Tournament Size</label>
                 <Input
                   type="number"
                   value={newTournamentSize}
@@ -162,7 +131,7 @@ export default function Tournaments() {
               </div>
               <Button 
                 onClick={handleCreateTournament}
-                disabled={createTournamentMutation.isPending || !newTournamentName.trim()}
+                disabled={createTournamentMutation.isPending}
                 className="w-full"
               >
                 {createTournamentMutation.isPending ? "Creating..." : "Create Tournament"}
@@ -190,25 +159,21 @@ export default function Tournaments() {
                   <Card key={tournament.id} className="relative">
                     <CardHeader>
                       <CardTitle className="flex items-center justify-between">
-                        <span className="truncate">{tournament.name}</span>
+                        <span>Tournament #{tournament.id.slice(-4)}</span>
                         <Badge variant="outline">
-                          {participants.length}/{tournament.maxParticipants}
+                          {participants.length}/{tournament.size}
                         </Badge>
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="space-y-2">
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">Entry Fee:</span>
-                          <span className="flex items-center gap-1">
-                            {tournament.entryFee} <Coins className="h-4 w-4" />
-                          </span>
+                          <span className="text-muted-foreground">Size:</span>
+                          <span>{tournament.size} players</span>
                         </div>
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">Prize Pool:</span>
-                          <span className="flex items-center gap-1 font-semibold text-green-600">
-                            {tournament.prizePool} <Coins className="h-4 w-4" />
-                          </span>
+                          <span className="text-muted-foreground">Status:</span>
+                          <Badge variant="secondary">{tournament.status}</Badge>
                         </div>
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-muted-foreground">Created:</span>
@@ -222,13 +187,11 @@ export default function Tournaments() {
                             onClick={() => joinTournamentMutation.mutate(tournament.id)}
                             disabled={
                               joinTournamentMutation.isPending || 
-                              !user || 
-                              user.pokecoinBalance < tournament.entryFee ||
-                              participants.length >= tournament.maxParticipants
+                              participants.length >= tournament.size
                             }
                             className="flex-1"
                           >
-                            Join ({tournament.entryFee} <Coins className="h-4 w-4 ml-1" />)
+                            Join Tournament
                           </Button>
                         ) : (
                           <Button variant="secondary" disabled className="flex-1">
@@ -266,7 +229,7 @@ export default function Tournaments() {
                 <Card key={tournament.id} className="border-orange-200 bg-orange-50/50">
                   <CardHeader>
                     <CardTitle className="flex items-center justify-between">
-                      <span className="truncate">{tournament.name}</span>
+                      <span>Tournament #{tournament.id.slice(-4)}</span>
                       <Badge variant="secondary">Active</Badge>
                     </CardTitle>
                   </CardHeader>
@@ -277,10 +240,8 @@ export default function Tournaments() {
                         <span>{Array.isArray(tournament.participants) ? tournament.participants.length : 0}</span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">Prize Pool:</span>
-                        <span className="flex items-center gap-1 font-semibold text-green-600">
-                          {tournament.prizePool} <Coins className="h-4 w-4" />
-                        </span>
+                        <span className="text-muted-foreground">Size:</span>
+                        <span>{tournament.size} players</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-muted-foreground">Started:</span>
@@ -306,7 +267,7 @@ export default function Tournaments() {
                 <Card key={tournament.id} className="border-green-200 bg-green-50/50">
                   <CardHeader>
                     <CardTitle className="flex items-center justify-between">
-                      <span className="truncate">{tournament.name}</span>
+                      <span>Tournament #{tournament.id.slice(-4)}</span>
                       <Badge variant="default">Completed</Badge>
                     </CardTitle>
                   </CardHeader>
@@ -319,10 +280,8 @@ export default function Tournaments() {
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">Prize Pool:</span>
-                        <span className="flex items-center gap-1 font-semibold text-green-600">
-                          {tournament.prizePool} <Coins className="h-4 w-4" />
-                        </span>
+                        <span className="text-muted-foreground">Size:</span>
+                        <span>{tournament.size} players</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-muted-foreground">Completed:</span>
@@ -343,7 +302,7 @@ export default function Tournaments() {
               <Trophy className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold mb-2">No Tournaments Yet</h3>
               <p className="text-muted-foreground mb-4">
-                Be the first to create a tournament and compete for Pokecoins!
+                Be the first to create a tournament!
               </p>
             </CardContent>
           </Card>

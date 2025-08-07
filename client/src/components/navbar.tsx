@@ -7,10 +7,8 @@ export default function Navbar() {
 
   const navItems = [
     { href: "/", label: "Home", icon: Home },
-    { href: "/casino", label: "Casino", icon: Dice6 },
     { href: "/tournaments", label: "Tournaments", icon: Trophy },
-    { href: "/leaderboard", label: "Leaderboard", icon: Crown },
-    { href: "/admin", label: "Admin", icon: Shield },
+    { href: "/gambling-logs", label: "Gambling Logs", icon: Dice6 },
   ];
 
   return (
@@ -23,7 +21,7 @@ export default function Navbar() {
               <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white text-sm">
                 P
               </div>
-              Pokemon Bot
+              EWagerBot
             </div>
           </Link>
 

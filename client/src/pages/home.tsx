@@ -2,49 +2,29 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Coins, Zap, Gift, TrendingUp } from "lucide-react";
+import { Coins, Zap, Dice1 } from "lucide-react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import PokecoinDisplay from "@/components/pokecoin-display";
 import PokemonCard from "@/components/pokemon-card";
 import { rollPokemon } from "@/lib/pokemon-api";
-import type { User, PokemonRoll } from "@shared/schema";
+import type { PokemonRoll } from "@shared/schema";
 
 const CURRENT_USER_ID = "test-user-1"; // In a real app, this would come from auth
 
 export default function Home() {
   const [isRolling, setIsRolling] = useState(false);
+  const [rollResult, setRollResult] = useState<number | null>(null);
   const { toast } = useToast();
 
-  const { data: user, isLoading: userLoading } = useQuery<User>({
-    queryKey: ["/api/users", CURRENT_USER_ID],
-  });
+
 
   const { data: recentRolls } = useQuery<PokemonRoll[]>({
     queryKey: ["/api/pokemon/rolls", CURRENT_USER_ID],
   });
 
-  const dailyBonusMutation = useMutation({
-    mutationFn: async () => {
-      const response = await apiRequest("POST", `/api/users/${CURRENT_USER_ID}/daily-bonus`);
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users", CURRENT_USER_ID] });
-      toast({
-        title: "Daily Bonus Claimed!",
-        description: "You received 100 Pokecoins!",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Daily Bonus Not Available",
-        description: "You can claim your daily bonus once every 24 hours.",
-        variant: "destructive",
-      });
-    },
-  });
+
 
   const rollMutation = useMutation({
     mutationFn: async (rollData: any) => {
@@ -52,22 +32,21 @@ export default function Home() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users", CURRENT_USER_ID] });
       queryClient.invalidateQueries({ queryKey: ["/api/pokemon/rolls", CURRENT_USER_ID] });
       setIsRolling(false);
     },
     onError: () => {
       toast({
         title: "Roll Failed",
-        description: "Insufficient Pokecoins or an error occurred.",
+        description: "An error occurred while rolling.",
         variant: "destructive",
       });
       setIsRolling(false);
     },
   });
 
-  const handlePokemonRoll = async (cost: number) => {
-    if (isRolling || !user || user.pokecoinBalance < cost) return;
+  const handlePokemonRoll = async () => {
+    if (isRolling) return;
     
     setIsRolling(true);
     const pokemonData = await rollPokemon();
@@ -78,7 +57,7 @@ export default function Home() {
         pokemonId: pokemonData.id,
         pokemonName: pokemonData.name,
         pokemonData,
-        cost,
+        cost: 0,
       });
     } else {
       setIsRolling(false);
@@ -90,105 +69,78 @@ export default function Home() {
     }
   };
 
-  const canClaimDaily = user?.lastDailyBonus 
-    ? new Date().getTime() - new Date(user.lastDailyBonus).getTime() >= 24 * 60 * 60 * 1000
-    : true;
+  const handleNumberRoll = () => {
+    const result = Math.floor(Math.random() * 100) + 1;
+    setRollResult(result);
+  };
 
-  if (userLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-lg">Loading...</div>
-      </div>
-    );
-  }
+
+
+
 
   return (
     <div className="space-y-8">
       {/* Header */}
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-          Pokemon Gambling Bot
+          EWagerBot
         </h1>
         <p className="text-muted-foreground max-w-2xl mx-auto">
-          ⚠️ Virtual currency only - No real money value - For entertainment purposes only
+          Roll Pokemon and track gambling results
         </p>
-        {user && <PokecoinDisplay balance={user.pokecoinBalance} />}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {/* Daily Bonus */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Gift className="h-5 w-5" />
-              Daily Bonus
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              Claim your daily 100 Pokecoin bonus!
-            </p>
-            <Button 
-              onClick={() => dailyBonusMutation.mutate()}
-              disabled={!canClaimDaily || dailyBonusMutation.isPending}
-              className="w-full"
-            >
-              {dailyBonusMutation.isPending ? "Claiming..." : canClaimDaily ? "Claim Bonus" : "Already Claimed"}
-            </Button>
-          </CardContent>
-        </Card>
-
+      <div className="grid gap-6 md:grid-cols-2">
         {/* Pokemon Rolling */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Zap className="h-5 w-5" />
-              Pokemon Rolling
+              Pokemon Rolling (1025)
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Roll a random Pokemon from 1-1025
+            </p>
             <Button 
-              onClick={() => handlePokemonRoll(50)}
-              disabled={isRolling || !user || user.pokecoinBalance < 50}
-              className="w-full"
-              variant="outline"
-            >
-              Roll Pokemon (50 <Coins className="h-4 w-4 inline" />)
-            </Button>
-            <Button 
-              onClick={() => handlePokemonRoll(100)}
-              disabled={isRolling || !user || user.pokecoinBalance < 100}
+              onClick={handlePokemonRoll}
+              disabled={isRolling}
               className="w-full"
             >
-              Premium Roll (100 <Coins className="h-4 w-4 inline" />)
+              {isRolling ? "Rolling..." : "Roll Pokemon"}
             </Button>
           </CardContent>
         </Card>
 
-        {/* Stats */}
+        {/* Number Roll */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5" />
-              Your Stats
+              <Dice1 className="h-5 w-5" />
+              Number Roll (1-100)
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
-            {user && (
-              <>
-                <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Total Earned:</span>
-                  <Badge variant="outline">{user.totalEarned} PC</Badge>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Roll a random number between 1 and 100
+            </p>
+            <Button 
+              onClick={handleNumberRoll}
+              className="w-full"
+              variant="outline"
+            >
+              Roll Number
+            </Button>
+            {rollResult && (
+              <div className="text-center p-4 bg-blue-50 rounded-lg">
+                <div className="text-2xl font-bold text-blue-600">
+                  {rollResult}
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Total Spent:</span>
-                  <Badge variant="outline">{user.totalSpent} PC</Badge>
+                <div className="text-sm text-muted-foreground">
+                  Your roll result
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Rolls Made:</span>
-                  <Badge variant="outline">{recentRolls?.length || 0}</Badge>
-                </div>
-              </>
+              </div>
             )}
           </CardContent>
         </Card>
