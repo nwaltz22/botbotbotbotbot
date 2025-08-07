@@ -1,6 +1,52 @@
-node_modules
-dist
+# Environment variables
+.env
+
+# Bot data
+discord_bot/ewager_data.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
 .DS_Store
-server/public
-vite.config.ts.*
-*.tar.gz
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Node.js (not needed for Discord bot only)
+node_modules/
+*.lock

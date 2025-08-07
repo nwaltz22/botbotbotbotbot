@@ -7,11 +7,12 @@ import os
 from datetime import datetime, timedelta
 import aiohttp
 from typing import Dict, List, Optional
+import re
 
 # Bot configuration
 intents = discord.Intents.default()
 intents.message_content = True
-bot = commands.Bot(command_prefix='!', intents=intents)
+bot = commands.Bot(command_prefix=['!', 'e!'], intents=intents)
 
 # Data storage
 DATA_FILE = 'ewager_data.json'
@@ -66,10 +67,51 @@ async def on_ready():
     print(f'{bot.user} has logged in as EWagerBot!')
     print(f'Bot is ready and serving in {len(bot.guilds)} guilds')
 
-@bot.command(name='roll')
-async def roll_pokemon(ctx):
-    """Roll a random Pokemon (1-1025)"""
-    user_id = str(ctx.author.id)
+@bot.event
+async def on_message(message):
+    """Handle all message events including universal roll detection"""
+    if message.author.bot:
+        return
+    
+    content = message.content.lower().strip()
+    
+    # Universal roll command detection
+    if detect_universal_roll(content):
+        await handle_pokemon_roll(message)
+        return
+    
+    # e!w command detection (shorthand for Pokemon rolls)
+    if content.startswith('e!w'):
+        await handle_pokemon_roll(message)
+        return
+    
+    # Process normal commands
+    await bot.process_commands(message)
+
+def detect_universal_roll(content: str) -> bool:
+    """Detect various roll command patterns"""
+    # Common roll prefixes
+    prefixes = ['!', '?', '>', '<', '~', '.', 'p!', 'm!', 'k!', 'c!']
+    
+    # Roll patterns to detect
+    patterns = [
+        r'roll\s+1025',
+        r'roll\s+pokemon',
+        r'roll\s+poke',
+        r'w\s+1025',
+        r'wish\s+1025'
+    ]
+    
+    for prefix in prefixes:
+        for pattern in patterns:
+            if re.search(f'{re.escape(prefix)}{pattern}', content):
+                return True
+    
+    return False
+
+async def handle_pokemon_roll(message):
+    """Handle Pokemon roll for any detected command"""
+    user_id = str(message.author.id)
     user_data = ewager.get_user(user_id)
     
     # Roll random Pokemon ID
@@ -110,11 +152,21 @@ async def roll_pokemon(ctx):
         if sprite_url:
             embed.set_thumbnail(url=sprite_url)
         
-        embed.set_footer(text=f"Rolled by {ctx.author.display_name}")
+        embed.set_footer(text=f"Rolled by {message.author.display_name}")
         
-        await ctx.send(embed=embed)
+        await message.channel.send(embed=embed)
     else:
-        await ctx.send("❌ Failed to fetch Pokemon data. Please try again!")
+        await message.channel.send("❌ Failed to fetch Pokemon data. Please try again!")
+
+@bot.command(name='roll')
+async def roll_pokemon_command(ctx):
+    """Roll a random Pokemon (1-1025) via command"""
+    await handle_pokemon_roll(ctx.message)
+
+@bot.command(name='w')
+async def w_command(ctx):
+    """e!w shorthand for Pokemon rolling"""
+    await handle_pokemon_roll(ctx.message)
 
 @bot.command(name='number')
 async def roll_number(ctx):
@@ -452,13 +504,13 @@ async def help_command(ctx):
     """Show help information"""
     embed = discord.Embed(
         title="🤖 EWagerBot Commands",
-        description="A simple Discord bot for Pokemon rolling and gambling tracking",
+        description="A Discord bot for Pokemon rolling and gambling tracking",
         color=0x3498db
     )
     
     embed.add_field(
         name="🎲 Rolling Commands",
-        value="`!roll` - Roll a random Pokemon (1-1025)\n`!number` - Roll a random number (1-100)\n`!recent` - Show your recent Pokemon rolls",
+        value="`!roll` or `e!w` - Roll a random Pokemon (1-1025)\n`!number` - Roll a random number (1-100)\n`!recent` - Show your recent Pokemon rolls\n\n**Universal Roll Detection:**\nResponds to most bot roll commands:\n`!roll 1025`, `?w 1025`, `>roll pokemon`, etc.",
         inline=False
     )
     

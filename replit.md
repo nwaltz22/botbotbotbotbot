@@ -1,36 +1,28 @@
 # Overview
 
-This project contains both a Discord bot (EWagerBot) and a simplified web application for Pokemon rolling and gambling tracking. The core features include Pokemon rolling with real PokeAPI data, tournament management, and gambling result logging. The project has been simplified to remove complex economy features and focus on basic functionality that matches the original Discord bot requirements.
+This is EWagerBot, a Discord bot for Pokemon rolling and gambling tracking. The bot features universal roll command detection, responding to roll commands from any bot while providing its own comprehensive command set. Built with Python and discord.py, it uses JSON file storage and integrates with PokeAPI for authentic Pokemon data.
 
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
+Project focus: Discord bot only, no web application components needed.
 
 # System Architecture
 
-## Frontend Architecture
-The frontend is built as a React SPA using TypeScript and modern React patterns:
-- **React Router**: Uses Wouter for lightweight client-side routing
-- **State Management**: TanStack Query for server state management and caching
-- **UI Framework**: Shadcn/ui components built on Radix UI primitives with Tailwind CSS
-- **Build Tool**: Vite for development and production builds
-- **Component Structure**: Modular component architecture with reusable UI components
-
-## Backend Architecture
-The backend follows a RESTful API design using Express.js:
-- **Web Framework**: Express.js with TypeScript
-- **API Structure**: RESTful endpoints organized by resource types (users, pokemon, gambling, tournaments)
-- **Data Validation**: Zod schemas for request/response validation
-- **Storage Layer**: Abstract storage interface allowing for different implementations
-- **Error Handling**: Centralized error handling middleware
+## Discord Bot Architecture
+The bot is built using Python and discord.py with a modular command structure:
+- **Command System**: Supports multiple prefixes (`!` and `e!`) with universal roll detection
+- **Event Handling**: Comprehensive message processing for roll command detection
+- **Data Management**: JSON file-based persistence with automatic saving
+- **API Integration**: Real-time Pokemon data fetching from PokeAPI
+- **Error Handling**: Robust error handling and user feedback
 
 ## Data Storage
-The application uses PostgreSQL with Drizzle ORM:
-- **Database**: PostgreSQL for persistent data storage
-- **ORM**: Drizzle ORM for type-safe database operations
-- **Schema**: Centralized schema definitions in TypeScript
-- **Migrations**: Drizzle Kit for database schema management
-- **Database Provider**: Configured for Neon serverless PostgreSQL
+The bot uses simple JSON file storage:
+- **Storage File**: `ewager_data.json` for all persistent data
+- **Data Structure**: Organized by users, tournaments, and gambling logs
+- **Backup Strategy**: Automatic saving after each operation
+- **Portability**: Easy to backup and transfer between environments
 
 ## Core Data Models
 - **Users**: Basic profile data for tracking
@@ -44,32 +36,23 @@ The application uses PostgreSQL with Drizzle ORM:
 - **Tournament System**: Basic tournament creation and participation
 - **Gambling Tracking**: Log gambling results between users
 
-## Discord Bot Features
-- **Commands**: Prefix-based commands (!) for all functionality
-- **Data Storage**: JSON file-based persistence
-- **Real-time**: Instant responses and updates
-- **User Friendly**: Rich embeds and error handling
+## Key Features
+- **Universal Roll Detection**: Responds to roll commands from any bot using regex patterns
+- **Command Flexibility**: Multiple prefixes and command variations supported
+- **Rich Embeds**: Beautiful Discord embeds for all responses
+- **Tournament System**: Full tournament lifecycle management
+- **User Tracking**: Comprehensive statistics and roll history
 
 # External Dependencies
 
 ## Third-Party APIs
 - **PokeAPI**: Fetches authentic Pokemon data including stats, sprites, types, and metadata
-- **Neon Database**: Serverless PostgreSQL hosting for production deployments
+- **Discord API**: Full Discord bot functionality via discord.py
 
-## UI Libraries
-- **Radix UI**: Headless component library for accessibility and behavior
-- **Lucide React**: Icon library for consistent iconography
-- **Tailwind CSS**: Utility-first CSS framework for styling
-
-## Development Tools
-- **Vite**: Build tool and development server
-- **TypeScript**: Type safety across the entire application
-- **ESBuild**: Fast JavaScript bundling for production builds
-- **Drizzle Kit**: Database schema management and migrations
-
-## Runtime Dependencies
-- **TanStack Query**: Server state management and caching
-- **Wouter**: Lightweight React routing
-- **Date-fns**: Date manipulation utilities
-- **Class Variance Authority**: Component variant management
-- **CLSX**: Conditional CSS class utilities
+## Python Libraries
+- **discord.py**: Main Discord bot framework (v2.3.0+)
+- **aiohttp**: Async HTTP client for PokeAPI requests
+- **json**: Built-in JSON handling for data persistence
+- **datetime**: Time and date management
+- **random**: Random number generation
+- **re**: Regular expressions for command detection
