@@ -81,7 +81,7 @@ async def on_message(message):
         return
     
     # e!w command detection (shorthand for Pokemon rolls)
-    if content.startswith('e!w'):
+    if content.startswith('e!w') or content == 'e!roll':
         await handle_pokemon_roll(message)
         return
     
@@ -89,11 +89,11 @@ async def on_message(message):
     await bot.process_commands(message)
 
 def detect_universal_roll(content: str) -> bool:
-    """Detect various roll command patterns"""
+    """Detect Pokemon roll command patterns (1025 only, not regular 100 rolls)"""
     # Common roll prefixes
     prefixes = ['!', '?', '>', '<', '~', '.', 'p!', 'm!', 'k!', 'c!']
     
-    # Roll patterns to detect
+    # Only detect Pokemon-specific roll patterns (1025)
     patterns = [
         r'roll\s+1025',
         r'roll\s+pokemon',
@@ -107,6 +107,8 @@ def detect_universal_roll(content: str) -> bool:
             if re.search(f'{re.escape(prefix)}{pattern}', content):
                 return True
     
+    # Make sure it's NOT a regular roll (like !roll, !roll 100, etc.)
+    # Only respond to Pokemon-specific commands
     return False
 
 async def handle_pokemon_roll(message):
@@ -159,9 +161,11 @@ async def handle_pokemon_roll(message):
         await message.channel.send("❌ Failed to fetch Pokemon data. Please try again!")
 
 @bot.command(name='roll')
-async def roll_pokemon_command(ctx):
-    """Roll a random Pokemon (1-1025) via command"""
-    await handle_pokemon_roll(ctx.message)
+async def roll_pokemon_command(ctx, *args):
+    """Roll a random Pokemon (1-1025) via command - only responds to Pokemon rolls"""
+    # Only respond if it's specifically for Pokemon (1025) or no args
+    if not args or '1025' in ' '.join(args).lower() or 'pokemon' in ' '.join(args).lower():
+        await handle_pokemon_roll(ctx.message)
 
 @bot.command(name='w')
 async def w_command(ctx):
@@ -510,7 +514,7 @@ async def help_command(ctx):
     
     embed.add_field(
         name="🎲 Rolling Commands",
-        value="`!roll` or `e!w` - Roll a random Pokemon (1-1025)\n`!number` - Roll a random number (1-100)\n`!recent` - Show your recent Pokemon rolls\n\n**Universal Roll Detection:**\nResponds to most bot roll commands:\n`!roll 1025`, `?w 1025`, `>roll pokemon`, etc.",
+        value="`e!roll` or `e!w` - Roll a random Pokemon (1-1025)\n`!number` - Roll a random number (1-100)\n`!recent` - Show your recent Pokemon rolls\n\n**Universal Pokemon Roll Detection:**\nResponds to Pokemon roll commands (1025 only):\n`!roll 1025`, `?w 1025`, `>roll pokemon`, etc.\n*Does NOT respond to regular number rolls*",
         inline=False
     )
     

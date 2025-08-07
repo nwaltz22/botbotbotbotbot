@@ -13,9 +13,11 @@ A simple Discord bot for Pokemon rolling and gambling tracking.
 ## Commands
 
 ### Rolling Commands
-- `!roll` - Roll a random Pokemon (1-1025)
+- `e!roll` or `e!w` - Roll a random Pokemon (1-1025)
 - `!number` - Roll a random number (1-100)
 - `!recent [limit]` - Show your recent Pokemon rolls
+
+**Universal Detection**: Only responds to Pokemon roll commands (1025), not regular rolls
 
 ### Tournament Commands
 - `!tournament` - Show tournament help

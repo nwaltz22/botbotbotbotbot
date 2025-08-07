@@ -4,8 +4,9 @@ A Discord bot for Pokemon rolling and gambling tracking with universal roll comm
 
 ## 🚀 Features
 
-- **Universal Roll Detection**: Responds to roll commands from any bot (`!roll 1025`, `?w 1025`, `>roll pokemon`, etc.)
-- **Native Commands**: Use `!roll`, `e!w`, or `e!` prefix for all commands
+- **Universal Pokemon Roll Detection**: Responds to Pokemon roll commands ONLY (`!roll 1025`, `?w 1025`, `>roll pokemon`, etc.)
+- **Native Commands**: Use `e!roll`, `e!w`, or `e!` prefix for all commands
+- **Ignores Regular Rolls**: Does NOT respond to regular number rolls (`!roll`, `!roll 100`, etc.)
 - **Pokemon Rolling**: Real Pokemon data from PokeAPI (1-1025)
 - **Tournament System**: Create and manage tournaments
 - **Gambling Logs**: Track gambling results between users
@@ -14,13 +15,14 @@ A Discord bot for Pokemon rolling and gambling tracking with universal roll comm
 ## 📋 Commands
 
 ### Rolling Commands
-- `!roll` or `e!w` - Roll a random Pokemon (1-1025)
+- `e!roll` or `e!w` - Roll a random Pokemon (1-1025)
 - `!number` - Roll a random number (1-100)
 - `!recent [limit]` - Show your recent Pokemon rolls
 
-**Universal Roll Detection:**
-The bot automatically responds to most Pokemon roll commands:
-- `!roll 1025`, `?w 1025`, `>roll pokemon`, `p!w`, `m!roll 1025`, etc.
+**Universal Pokemon Roll Detection:**
+The bot automatically responds to Pokemon roll commands (1025 ONLY):
+- `!roll 1025`, `?w 1025`, `>roll pokemon`, `p!w 1025`, `m!roll 1025`, etc.
+- **Does NOT respond to regular number rolls** like `!roll` or `!roll 100`
 
 ### Tournament Commands
 - `!tournament` - Show tournament help
